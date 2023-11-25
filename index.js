@@ -2,6 +2,7 @@ import fs from "fs";
 import http from "http";
 import url from "url";
 import path from "path";
+import replaceTemplate from "./modules/replaceTemplate.js";
 //////
 // Files
 
@@ -52,24 +53,6 @@ const tempCard = fs.readFileSync(
   `${__dirname.slice(1)}/templates/template-card.html`,
   "utf-8"
 );
-
-const replaceTemplate = function (temp, product) {
-  let output = temp.replace(/{%PRODUCTNAME%}/g, product.productName);
-  output = output.replace(/{%IMAGE%}/g, product.image);
-  output = output.replace(/{%QUANTITY%}/g, product.quantity);
-  output = output.replace(/{%NUTRIENTS%}/g, product.nutrients);
-  output = output.replace(/{%FROM%}/g, product.from);
-  output = output.replace(/{%DESCRIPTION%}/g, product.description);
-
-  output = output.replace(/{%PRICE%}/g, product.price);
-  output = output.replace(/{%ID%}/g, product.id);
-
-  // replace {%NOT_ORGANIC%} with the class name
-  if (!product.organic)
-    output = output.replace(/{%NOT_ORGANIC%}/g, "not-organic");
-
-  return output;
-};
 
 const server = http.createServer((req, res) => {
   const { query, pathname } = url.parse(req.url, true);
