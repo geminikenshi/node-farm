@@ -34,23 +34,64 @@ import path from "path";
 // dirname is not defined in ES module scope
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
-console.log(__dirname);
 
-const fileData = fs.readFileSync(
+const data = fs.readFileSync(
   `${__dirname.slice(1)}/dev-data/data.json`,
   "utf-8"
 );
+const dataObj = JSON.parse(data);
+const tempOverview = fs.readFileSync(
+  `${__dirname.slice(1)}/templates/template-overview.html`,
+  "utf-8"
+);
+const tempProduct = fs.readFileSync(
+  `${__dirname.slice(1)}/templates/template-product.html`,
+  "utf-8"
+);
+const tempCard = fs.readFileSync(
+  `${__dirname.slice(1)}/templates/template-card.html`,
+  "utf-8"
+);
+
+const replaceTemplate = function (temp, product) {
+  let output = temp.replace(/{%PRODUCTNAME%}/g, product.productName);
+  output = output.replace(/{%IMAGE%}/g, product.image);
+  output = output.replace(/{%QUANTITY%}/g, product.quantity);
+  output = output.replace(/{%PRICE%}/g, product.price);
+  output = output.replace(/{%ID%}/g, product.id);
+
+  // replace {%NOT_ORGANIC%} with the class name
+  if (!product.organic)
+    output = output.replace(/{%NOT_ORGANIC%}/g, "not-organic");
+
+  return output;
+};
 
 const server = http.createServer((req, res) => {
   const pathName = req.url;
 
+  // Overview page
   if (pathName === "/" || pathName === "/overview") {
-    res.end("This is the OVERVIEW");
+    res.writeHead(200, "", { "content-type": "text/html" });
+
+    const cardHtml = dataObj
+      .map((el) => replaceTemplate(tempCard, el))
+      .join("");
+
+    const output = tempOverview.replace("{%PRODUCT_CARDS%}", cardHtml);
+
+    res.end(output);
+
+    // Product page
   } else if (pathName === "/product") {
     res.end("This is the PRODUCT");
+
+    // API
   } else if (pathName === "/api") {
     res.writeHead(200, "", { "content-type": "application/json" });
-    res.end(fileData);
+    res.end(data);
+
+    // Not found
   } else {
     res.writeHead(404, "", {
       "Content-type": "text/html",
