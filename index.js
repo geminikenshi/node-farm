@@ -3,6 +3,7 @@ import http from "http";
 import url from "url";
 import path from "path";
 import replaceTemplate from "./modules/replaceTemplate.js";
+import slugify from "slugify";
 //////
 // Files
 
@@ -53,6 +54,7 @@ const tempCard = fs.readFileSync(
   `${__dirname.slice(1)}/templates/template-card.html`,
   "utf-8"
 );
+// const slugs = dataObj.map((el) => slugify(el.productName, { lower: true }));
 
 const server = http.createServer((req, res) => {
   const { query, pathname } = url.parse(req.url, true);
